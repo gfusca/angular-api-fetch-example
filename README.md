@@ -74,3 +74,72 @@ export class AppComponent implements OnInit {
   </li>
 ```
 
+### Bonus: Busquedas sobre listado
+
+Podemos aprovechar las habilidades de binding de angular para generar una busqueda en tiempo real sobre los valores traidos. Para esto debemos utilizar los componentes de Pipe que provee angular 2. [https://angular.io/guide/pipes]
+
+Para esto debemos primero definir que transformacion va a realizar el pipe. Esto se logra implementando la interfaz de Pipe que provee angular. En este caso vamos a recibir como primer parametro el listado de items a filtrar y como segundo parámetro el valor que se utilizará como filtro.
+
+```
+//MyFilter.ts
+@Pipe({
+  name: 'myFilter'
+
+})
+
+@Injectable()
+export class MyFilter implements PipeTransform {
+  transform(items: any[], arg: string): any {
+    if (!items)
+      return []
+    return items.filter( item => item.title.indexOf(arg) >= 0);
+  }
+}
+```
+
+Una vez definido el pipe se debe declarar el mismo, una forma posible es declararlo de forma global para que este disponible en el resto de la aplicación. La declaración se deberá realizar en el archivo .module del componente app (el principal).
+
+```
+import { AppComponent } from './app.component';
+import { MyFilter} from "./myfilter.ts";
+
+
+@NgModule({
+  declarations: [
+    AppComponent
+    MyFilter
+  ],
+
+```
+
+Nos queda la configuración de la vista del componente para poder disparar los eventos de sobre el cambio de valores en el campo de búsqueda de la aplicación. Para esto debemos realizar un binding de ventos sobre el campo de búsqueda (https://angular.io/guide/user-input).
+
+```
+<input (input)="onSearchChange($event.target.value)" />
+```
+
+Con esto estamos indicando que cuando cambie el valor del elemento <input> se llamará al método onSearchChange del componente.
+
+```
+
+// app.component.ts (controller)
+export class AppComponent implements OnInit {
+
+  onSearchChange(value) {
+    this.searchText = value;
+  } 
+
+
+```
+
+Por último nos queda indicar el filtro a aplicar sobre el listado para que angular pueda realizar el binding sobre el pipe definido.
+
+
+```
+  <li *ngFor="let item of items | myFilter: searchText">
+```
+
+Agregando | myFilter : searchText al componente <li> estamos aplicando el filtro llamado myFilter a la propiedad items utilizando como argumento de filtro la propiedad searchText del componente App.
+
+
+
