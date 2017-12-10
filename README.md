@@ -1,27 +1,76 @@
-# ApiConsumerApp
+# Cookbook AngularJS: ¿Cómo obtener datos desde una API REST y mostrar los datos sin morir en el intento?
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 1.6.0.
+## Seguir los pasos de la documentación oficial de AngularJS para crear una app a traves de AngularCLI
 
-## Development server
+[https://angular.io/guide/quickstart]
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+Esto generará una nueva aplicación AngularJS con el contenido necesario para poder arrancar tu proyecto
 
-## Code scaffolding
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+### 1. Binding de propiedades en Angular JS
+Gracias al binding de datos que hace angular entre sus controladores y vistas (.html y .ts) es posible definir propiedades a una clase y luego poder consumir esas propiedades directamente en el .html)
 
-## Build
+```typescript
+// app.component.ts (controller)
+export class AppComponent  {
+  title = 'mi aplicación'; 
+```
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `-prod` flag for a production build.
+```
 
-## Running unit tests
+<!-- app.component.html VISTA -->
+<div style="text-align:center">
+  <h1>
+    Welcome to {{ title }}!
+```
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+Esta vinculación de datos (binding) entre la vista y el controlador persiste en tiempo de ejecución. Es por esto que si cambia el valor de la propiedad durante la ejecución de la aplicación, esta misma se verá reflejada en la vista
 
-## Running end-to-end tests
+### 2. Consumir datos de una API REST
 
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
+Para poder consumir datos de una api se utilizará el modulo fetch [https://developer.mozilla.org/es/docs/Web/API/Fetch_API/Utilizando_Fetch]
 
-## Further help
+```
+npm install --save @types/node-fetch
+```
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+Para poder ejecutar la obtención de datos vamos a utilizar la interfaz OnInit que provee angularjsi [https://docs.angularjs.org/guide/component]. Este método se llamará al iniciar el componente. Dentro de este componente vamos a obtener los datos de una API. Para este caso utilizaremos una mock-api a traves de la herramienta mockeable.io [https://www.mockable.io], que permite generar una api mock de forma simple y rapida. Esta API devuelve un json con la siguiente información:
+
+```
+{
+  "items": [
+    {
+      "title": "title1"
+    },
+    {
+      "title": "title2"
+    }
+  ]
+}
+```
+
+
+```typescript
+// app.component.ts (controller)
+export class AppComponent implements OnInit {
+  title = 'mi aplicación';
+  items = [] <-- vamos a almacenar los datos en esta propiedad
+
+  // este metodo es llamado al inicializarse el componente
+  ngOnInit() {
+    const url = 'http://demo2559707.mockable.io/data';
+    // obtengo datos utilizando fetch
+    fetch(url).then(response => response.json()).then(data => {
+      this.items = data.items; // <-- asigno los valores a la propiedad del componente
+    });
+  }
+
+```
+
+```
+  <!-- app.component.html -->
+  <li *ngFor="let item of items">
+    <h2 >{{item.title}}</h2>
+  </li>
+```
+
